@@ -15,8 +15,24 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+import os
+
+
+from django.views.decorators.http import require_GET
+
+@require_GET
+def api_root(request):
+    codespace_name = os.environ.get('CODESPACE_NAME', 'localhost')
+    base_url = f'https://{codespace_name}-8000.app.github.dev' if codespace_name != 'localhost' else 'http://localhost:8000'
+    return JsonResponse({
+        'activities': f'{base_url}/api/activities/',
+        'teams': f'{base_url}/api/teams/',
+        'users': f'{base_url}/api/users/',
+    })
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('octofit_tracker.urls')),
+    path('api/', api_root, name='api-root'),
 ]
