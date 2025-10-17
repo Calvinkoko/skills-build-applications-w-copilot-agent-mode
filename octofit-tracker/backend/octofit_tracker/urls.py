@@ -19,12 +19,17 @@ from django.http import JsonResponse
 import os
 
 
+
 from django.views.decorators.http import require_GET
 
 @require_GET
 def api_root(request):
     codespace_name = os.environ.get('CODESPACE_NAME', 'localhost')
-    base_url = f'https://{codespace_name}-8000.app.github.dev' if codespace_name != 'localhost' else 'http://localhost:8000'
+    if codespace_name and codespace_name != 'localhost':
+        base_url = f'https://{codespace_name}-8000.app.github.dev'
+    else:
+        base_url = 'http://localhost:8000'
+    # Return API endpoints using the correct base URL
     return JsonResponse({
         'activities': f'{base_url}/api/activities/',
         'teams': f'{base_url}/api/teams/',
@@ -33,6 +38,5 @@ def api_root(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('octofit_tracker.urls')),
     path('api/', api_root, name='api-root'),
 ]
